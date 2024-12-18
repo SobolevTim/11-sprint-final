@@ -1,18 +1,21 @@
 name: golang-pipeline
 on: push
+
 jobs:
   test:
     runs-on: ubuntu-latest
-    container: golang:1.22
+    container: golang:1.23 # или golang:latest
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Dependencies
+        run: go mod tidy
+
       - name: Run Unit Tests
-        run: GOOS=linux GOARCH=amd64 go test
+        run: GOOS=linux GOARCH=amd64 go test -v ./...
 
       - name: Vet
-        run: |
-          go vet ./...
+        run: go vet ./...
 
   deploy:
     name: Push Docker image to Docker Hub
@@ -36,7 +39,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5.5.1
         with:
-          images: <Docker ID>/hello-golang
+          images: timsobolev/sprint11-golang
 
       - name: Build and push Docker Image
         uses: docker/build-push-action@v5
